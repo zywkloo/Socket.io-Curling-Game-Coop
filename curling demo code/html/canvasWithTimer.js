@@ -36,15 +36,7 @@ required file. No attempt is made to bundle the files.
 
 //leave this moving word for fun and for using it to
 //provide status info to client.
-let movingString = {
-  word: "Moving",
-  x: 100,
-  y: 100,
-  xDirection: 1, //+1 for rightwards, -1 for leftwards
-  yDirection: 1, //+1 for downwards, -1 for upwards
-  stringWidth: 50, //will be updated when drawn
-  stringHeight: 24
-} //assumed height based on drawing point size
+
 
 let timer //timer for animating motion
 let canvas = document.getElementById('canvas1') //our drawing canvas
@@ -129,9 +121,6 @@ function drawCanvas() {
   context.strokeStyle = 'blue'
   context.fillStyle = 'red'
 
-  //used for debugging. No used in the simulation
-  movingString.stringWidth = context.measureText(movingString.word).width
-  context.fillText(movingString.word, movingString.x, movingString.y)
 
   //draw the stones
   allStones.draw(context, iceSurface)
@@ -149,7 +138,6 @@ socket.on('post_data', function(data) {
   console.log("data: " + data)
   console.log("typeof: " + typeof data)
   let responseObj = data
-  movingString.word = responseObj.text
   drawCanvas()
 })
 
@@ -249,8 +237,6 @@ function handleMouseUp(e) {
 
 
 function handleTimer() {
-  movingString.x = (movingString.x + 1 * movingString.xDirection)
-  movingString.y = (movingString.y + 1 * movingString.yDirection)
 
   allStones.advance(iceSurface.getShootingArea())
   for (let stone1 of allStones.getCollection()) {
@@ -267,12 +253,6 @@ function handleTimer() {
     score = iceSurface.getCurrentScore(allStones)
     enableShooting = true
   }
-
-  //keep moving string within canvas bounds
-  if (movingString.x + movingString.stringWidth > canvas.width) movingString.xDirection = -1
-  if (movingString.x < 0) movingString.xDirection = 1
-  if (movingString.y > canvas.height) movingString.yDirection = -1
-  if (movingString.y - movingString.stringHeight < 0) movingString.yDirection = 1
 
   drawCanvas()
 }
@@ -296,47 +276,10 @@ function handleKeyDown(e) {
 }
 
 function handleKeyUp(e) {
-  //console.log("key UP: " + e.which);
-  if (e.which == RIGHT_ARROW | e.which == LEFT_ARROW | e.which == UP_ARROW | e.which == DOWN_ARROW) {
-    //do nothing for now
-  }
-
-  if (e.which == ENTER) {
-    handleSubmitButton() //treat ENTER key like you would a submit
-    $('#userTextField').val('') //clear the user text field
-  }
-
   e.stopPropagation()
   e.preventDefault()
 }
 
-function handleSubmitButton() {
-
-  let userText = $('#userTextField').val() //get text from user text input field
-  //clear lines of text in textDiv
-  let textDiv = document.getElementById("text-area")
-  textDiv.innerHTML = ''
-
-  if (userText && userText !== '') {
-    let userRequestObj = {
-      text: userText
-    }
-    let userRequestJSON = JSON.stringify(userRequestObj)
-    $('#userTextField').val('') //clear the user text field
-
-    //alert ("You typed: " + userText);
-    //$.post("post_data", userRequestJSON, function(data, status) {
-    //  console.log("data: " + data)
-    //  console.log("typeof: " + typeof data)
-    //  let responseObj = data
-    //  movingString.word = responseObj.text
-    //})
-
-
-
-    socket.emit('post_data', userRequestJSON)
-  }
-}
 
 function handleJoinAsHomeButton(){
   console.log(`handleJoinAsHomeButton()`)
