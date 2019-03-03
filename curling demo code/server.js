@@ -16,10 +16,12 @@ Use browser to view pages at http://localhost:3000/collisions.html
 */
 
 //Server Code
-const http = require("http") //need to http
+const app = require("http").createServer(handler) //need to http
+const io = require('socket.io')(app)
 const fs = require("fs") //needed if you want to read and write files
 const url = require("url") //to parse url strings
-
+const PORT = process.env.PORT || 3000
+app.listen(PORT)//server listening on PORT
 const ROOT_DIR = "html" //dir to serve static files from
 
 const MIME_TYPES = {
@@ -48,7 +50,7 @@ function get_mime(filename) {
   return MIME_TYPES["txt"]
 }
 
-http.createServer(function(request, response) {
+function handler(request, response) {
     let urlObj = url.parse(request.url, true, false)
     console.log("\n============================")
     console.log("PATHNAME: " + urlObj.pathname)
@@ -98,14 +100,13 @@ http.createServer(function(request, response) {
             response.end(JSON.stringify(err))
             return
           }
-          response.writeHead(200, {
-            "Content-Type": get_mime(filePath)
-          })
+          response.writeHead(200, {"Content-Type": get_mime(filePath)})
           response.end(data)
-        })
-      }
-    })
-  }).listen(3000)
+        })// read file end
+
+      }// GET end
+    })// end of massege
+  }
 
 console.log("Server Running at PORT 3000  CNTL-C to quit")
 console.log("To Test")
