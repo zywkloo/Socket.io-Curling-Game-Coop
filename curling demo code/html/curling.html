@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!--
+  Curling simulation application web page
+
+  Notice in this source file there are no pre-attached
+  mouse event handlers. They will be added using jQuery in the
+  supporting javascript file.
+-->
+<html>
+   <head>
+     <title>2406</title>
+     <script src="jquery-1.11.3.js"></script>
+
+      <style>
+         body {
+            background: #dddddd;
+         }
+		 p {
+			 font-size: large;
+			 font-weight: bold;
+			 font-family: "Courier", Monospace;
+		 }
+
+		 /*element selectors: */
+		 canvas {
+		    margin: 20px;
+			/*important here for padding to be 0 for mouse calculations */
+            padding: 0px;
+		 }
+		 /* class selectors: */
+		 .canvas {
+            background: #ffffff;
+            border: thin inset #aaaaaa;
+         }
+
+         /*id selectors: */
+
+         #canvas1 {
+         }
+
+
+      </style>
+   </head>
+
+  <body>
+    <canvas id='canvas1' class='canvas' width='1000' height='900'>
+      Canvas not supported
+    </canvas>
+    <br>
+    <input type = "text"  id="userTextField" name = "userTextField"  value="" size = "60" />
+    <input type="button" value="Submit Request" onClick="handleSubmitButton()">
+    <input type="button" id="JoinAsHomeButton" value="Join as HOME" disabled onClick="handleJoinAsHomeButton()">
+    <input type="button" id="JoinAsVisitorButton" value="Join as VISITOR" disabled onClick="handleJoinAsVisitorButton()">
+    <input type="button" id="JoinAsSpectatorButton" value="Join as Spectator" disabled onClick="handleJoinAsSpectatorButton()">
+
+	<div id="text-area">
+	</div>
+
+  <script src='queue.js'></script>
+  <script src='constants_and_state_vars.js'></script>
+  <script src='ice.js'></script>
+  <script src='stone.js'></script>
+  <script src='set_of_stones.js'></script>
+  <script src='collision.js'></script>
+  <script src='set_of_collisions.js'></script>
+  <script src='cue.js'></script>
+  <script src='canvasWithTimer.js'></script>
+  </body>
+</html>
