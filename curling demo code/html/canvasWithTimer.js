@@ -57,6 +57,8 @@ shootingQueue = new Queue() //queue of stones still to be shot
 let shootingArea = iceSurface.getShootingArea()
 let stoneRadius = iceSurface.nominalStoneRadius()
 
+
+
 //create stones
 for(let i=0; i<STONES_PER_TEAM; i++){
   let homeStone = new Stone(0, 0, stoneRadius, HOME_COLOUR)
@@ -138,6 +140,18 @@ function drawCanvas() {
   //draw the score (as topmost feature).
   iceSurface.drawScore(context, score)
 }
+
+//connect to server and retain the socket
+let socket = io('http://' + window.document.location.host)
+//let socket = io('http://localhost:3000')
+
+socket.on('post_data', function(data) {
+  console.log("data: " + data)
+  console.log("typeof: " + typeof data)
+  let responseObj = data
+  movingString.word = responseObj.text
+  drawCanvas()
+})
 
 function getCanvasMouseLocation(e) {
   //provide the mouse location relative to the upper left corner
@@ -311,12 +325,16 @@ function handleSubmitButton() {
     $('#userTextField').val('') //clear the user text field
 
     //alert ("You typed: " + userText);
-    $.post("post_data", userRequestJSON, function(data, status) {
-      console.log("data: " + data)
-      console.log("typeof: " + typeof data)
-      let responseObj = data
-      movingString.word = responseObj.text
-    })
+    //$.post("post_data", userRequestJSON, function(data, status) {
+    //  console.log("data: " + data)
+    //  console.log("typeof: " + typeof data)
+    //  let responseObj = data
+    //  movingString.word = responseObj.text
+    //})
+
+
+
+    socket.emit('post_data', userRequestJSON)
   }
 }
 
