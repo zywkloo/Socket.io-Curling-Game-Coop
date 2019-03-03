@@ -50,6 +50,13 @@ function get_mime(filename) {
   return MIME_TYPES["txt"]
 }
 
+io.on('connection', function(socket){
+  socket.on('post_data', function(data){
+    console.log('RECEIVED DATA: ' + data)
+    io.emit('post_data', data) //broadcast to everyone including sender
+  })
+})
+
 function handler(request, response) {
     let urlObj = url.parse(request.url, true, false)
     console.log("\n============================")
@@ -107,7 +114,7 @@ function handler(request, response) {
 
       }// GET end
     })// end of massege
-  }
+  }//handler end
 
 console.log("Server Running at PORT 3000  CNTL-C to quit")
 console.log("To Test")
