@@ -71,6 +71,7 @@ function handler(request, response) {
       //Handle the client POST requests
       //console.log('received data: ', receivedData)
 
+
       //If it is a POST request then we will check the data.
       if (request.method == "POST") {
         //Do this for all POST messages
@@ -89,7 +90,7 @@ function handler(request, response) {
       else if (request.method == "GET") {
         //handle GET requests as static file requests
         var filePath = ROOT_DIR + urlObj.pathname
-        if (urlObj.pathname === "/") filePath = ROOT_DIR + "/index.html"
+        if (urlObj.pathname === "/") filePath = ROOT_DIR + "/curling.html"
 
         fs.readFile(filePath, function(err, data) {
           if (err) {
