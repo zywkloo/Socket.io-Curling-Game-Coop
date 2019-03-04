@@ -98,7 +98,8 @@ socket.on('new_client',()=>{
 
 socket.on('update_colour',(data) => {
   let serverColour = JSON.parse(data)
-  if (shootingQueue.front().getColour() !== serverColour && !shootingQueue.isEmpty()) shootingQueue.dequeue()
+  if (shootingQueue.front().getColour() !== serverColour && !shootingQueue.isEmpty()) {
+    shootingQueue.dequeue()}
 })
 
 //get the leaver's name
