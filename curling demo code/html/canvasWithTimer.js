@@ -47,7 +47,7 @@ visitorStones = new SetOfStones() //set of visitor stones in no particular order
 shootingQueue = new Queue() //queue of stones still to be shot
 let shootingArea = iceSurface.getShootingArea()
 let stoneRadius = iceSurface.nominalStoneRadius()
-
+//track client type
 let PLAYER={
   home:false,
   visitor:false,
@@ -75,6 +75,18 @@ socket.on('button_update', (data) => {
   }else{
     spectatorButton.disable = false
   }
+})
+socket.on('button_update_spectator', () => {
+  let spectatorButton = document.getElementById("JoinAsSpectatorButton")
+  let visitorButton = document.getElementById("JoinAsVisitorButton")
+  let homeButton = document.getElementById("JoinAsHomeButton")
+  homeButton.style.backgroundColor = HOME_PROMPT_COLOUR
+  visitorButton.style.backgroundColor= VISITOR_PROMPT_COLOUR
+  spectatorButton.style.backgroundColor= SPECTATOR_PROMPT_COLOUR
+  visitorButton.disable = true
+  homeButton.disable=true
+  spectatorButton.disable=true
+  PLAYER.spectator = true
 })
 
 
@@ -350,16 +362,13 @@ function handleJoinAsSpectatorButton(){
   let spectatorButton = document.getElementById("JoinAsSpectatorButton")
   let visitorButton = document.getElementById("JoinAsVisitorButton")
   let homeButton = document.getElementById("JoinAsHomeButton")
-  homeButton.disabled = true //disable button
-  spectatorButton.disabled = true //disable button
-  visitorButton.disabled = true //disable button
   homeButton.style.backgroundColor="lightgray"
   spectatorButton.style.backgroundColor="lightgray"
   visitorButton.style.backgroundColor="lightgray"
   PLAYER.spectator = true
-  PLAYER.home = true
-  PLAYER.visitor = true
-  if (PLAYER.spectator === false) PLAYER.spectator === true
+  homeButton.disabled = true //disable button
+  spectatorButton.disabled = true //disable button
+  visitorButton.disabled = true //disable button
   if(!isSpectatorClient) isSpectatorClient = true
 
 }

@@ -76,12 +76,16 @@ io.on('connection', function(socket){
     // spectator join
     if(playerData.playerType === "spectator" &&
     playerData.playerStatus ==="true" ){
+      io.emit('button_update_spectator')
       console.log(`Spectator joined`)
+      return
     }
     let sendingData = players
     //console.log('PLAYERS ON SERVER : '+ JSON.stringify(sendingData))
     io.emit('button_update', JSON.stringify(sendingData))
   })
+
+
 
   socket.on('new_client',()=>{
     console.log('new client joined')
