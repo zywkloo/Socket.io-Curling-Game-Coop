@@ -98,7 +98,7 @@ socket.on('new_client',()=>{
 
 socket.on('update_colour',(data) => {
   let serverColour = JSON.parse(data)
-  if (shootingQueue.front().getColour() !== serverColour) shootingQueue.dequeue()
+  if (shootingQueue.front().getColour() !== serverColour && !shootingQueue.isEmpty()) shootingQueue.dequeue()
 })
 
 
@@ -301,7 +301,9 @@ function handleTimer() {
   drawCanvas()
 }
 function handleColour() {
-  socket.emit('colour_update',JSON.stringify(shootingQueue.front().getColour()))
+  if (!shootingQueue.isEmpty()){
+    socket.emit('colour_update',JSON.stringify(shootingQueue.front().getColour()))
+  }
 }
 
 
