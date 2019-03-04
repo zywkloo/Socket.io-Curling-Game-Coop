@@ -67,8 +67,6 @@ socket.on('button_update', (data) => {
   homeButton.style.backgroundColor = HOME_PROMPT_COLOUR
   visitorButton.style.backgroundColor= VISITOR_PROMPT_COLOUR
   spectatorButton.style.backgroundColor= SPECTATOR_PROMPT_COLOUR
-  console.log('Client home: '+ playerData.home)
-  console.log('Client visitor: '+ playerData.visitor)
   homeButton.disabled = playerData.home
   visitorButton.disabled = playerData.visitor
   if (PLAYER.home === true || PLAYER.visitor === true){
@@ -98,8 +96,10 @@ socket.on('new_client',()=>{
 
 socket.on('update_colour',(data) => {
   let serverColour = JSON.parse(data)
+  console.log('serverColour: '+ serverColour)
   if (shootingQueue.front().getColour() !== serverColour && !shootingQueue.isEmpty()) {
-    shootingQueue.dequeue()}
+    shootingQueue.dequeue()
+  }
 })
 
 //get the leaver's name
@@ -287,7 +287,7 @@ function handleMouseUp(e) {
     if (stoneBeingShot != null) stoneBeingShot.addVelocity(cueVelocity)
     shootingCue = null
     shootingQueue.dequeue()
-    handleColour()
+    socket.emit('colour_update',JSON.stringify(shootingQueue.front().getColour()))
     enableShooting = false //disable shooting until shot stone stops
   }
 

@@ -56,53 +56,15 @@ function get_mime(filename) {
   return MIME_TYPES["txt"]
 }
 
-<<<<<<< HEAD
-io.on('connection', function(socket){
-  io.emit('button_update', JSON.stringify(players))
-  io.emit('new_client')
-
-
-  socket.on('player_registration',(data) => {
-    let playerData = JSON.parse(data)
-    //home player join
-    if (playerData.playerType === "home" &&
-    playerData.playerStatus ==="true" ){
-      players.home = true
-      console.log(`Home Player is ready`)
-    }
-    //visitor player join
-    if(playerData.playerType === "visitor" &&
-    playerData.playerStatus ==="true" ){
-      players.visitor = true
-      console.log(`Visitor Player is ready`)
-    }
-    // spectator join
-    if(playerData.playerType === "spectator" &&
-    playerData.playerStatus ==="true" ){
-      io.emit('button_update_spectator')
-      console.log(`Spectator joined`)
-      return
-    }
-    let sendingData = players
-    //console.log('PLAYERS ON SERVER : '+ JSON.stringify(sendingData))
-    io.emit('button_update', JSON.stringify(sendingData))
-  })
-
-  socket.on('colour_update',(data) => {
-
-    io.emit('update_colour',data)
-  })
-
-
-
-=======
-
-
 io.on('connection', function(socket){
     // this is the curUser information alive only for this session
     var curUser= {home:false,visitor:false,spectator:false}
     io.emit('button_update', JSON.stringify(players))
 
+    socket.on('colour_update',(data) => {
+      console.log(JSON.stringify(data))
+      io.emit('update_colour',data)
+    })
     socket.on('player_registration',(data) => {
         let playerData = JSON.parse(data)
         //home player join
@@ -152,7 +114,6 @@ io.on('connection', function(socket){
             io.sockets.emit('button_update', JSON.stringify(players))
         })
     }
->>>>>>> Disconect-event
 })
 
 
