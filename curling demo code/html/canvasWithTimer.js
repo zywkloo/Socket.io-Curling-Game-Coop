@@ -77,6 +77,26 @@ socket.on('button_update', (data) => {
   }
 })
 
+//get the leaver's name
+socket.on('leave',function(data){
+  let curUser=JSON.parse(data)
+  if(curUser != null){
+    let leaverClass=""
+    if (curUser.home=== true) {
+      leaverClass= leaverClass+" home "
+    }
+    if (curUser.visitor===true) {
+      leaverClass= leaverClass+" vistor "
+    }
+    if (curUser.spectator===true) {
+      leaverClass= leaverClass+" spectator "
+    }
+    var html = '<p>FBI warning: the player, who is '+leaverClass+', has left the game </p>';
+    let textDiv = document.getElementById("text-area")   //text-area html injection
+    //textDiv.innerHTML = ``  //empty the innerHTML
+    textDiv.innerHTML += html
+  }
+})
 
 //create stones
 for(let i=0; i<STONES_PER_TEAM; i++){
