@@ -91,7 +91,6 @@ socket.on('button_update_spectator', () => {
   enableShooting=false
 })
 socket.on('new_client',()=>{
-  console.log('shoot disabled')
   enableShooting=false// cant shoot untill register as home or visitor
 })
 
