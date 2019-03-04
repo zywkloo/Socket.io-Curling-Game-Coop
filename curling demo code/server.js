@@ -24,6 +24,11 @@ const PORT = process.env.PORT || 3000
 app.listen(PORT)//server listening on PORT
 const ROOT_DIR = "html" //dir to serve static files from
 
+let players = {
+  home:false,
+  visitor:false
+}
+
 const MIME_TYPES = {
   css: "text/css",
   gif: "image/gif",
@@ -51,18 +56,47 @@ function get_mime(filename) {
 }
 
 io.on('connection', function(socket){
-  socket.on('post_data', function(data){
-    console.log('RECEIVED DATA: ' + data)
-    io.emit('post_data', data) //broadcast to everyone including sender
+  io.emit('button_update', JSON.stringify(players))
+
+
+  socket.on('player_registration',(data) => {
+    let playerData = JSON.parse(data)
+    //home player join
+    if (playerData.playerType === "home" &&
+    playerData.playerStatus ==="true" ){
+      players.home = true
+      console.log(`Home Player is ready`)
+    }
+    //visitor player join
+    if(playerData.playerType === "visitor" &&
+    playerData.playerStatus ==="true" ){
+      players.visitor = true
+      console.log(`Visitor Player is ready`)
+    }
+    // spectator join
+    if(playerData.playerType === "spectator" &&
+    playerData.playerStatus ==="true" ){
+      console.log(`Spectator joined`)
+    }
+    let sendingData = players
+    //console.log('PLAYERS ON SERVER : '+ JSON.stringify(sendingData))
+    io.emit('button_update', JSON.stringify(sendingData))
+  })
+
+  socket.on('new_client',()=>{
+    console.log('new client joined')
+    let sendingData = players
+    //console.log('PLAYERS ON SERVER : '+ JSON.stringify(sendingData))
+    io.emit('button_update', JSON.stringify(sendingData))
   })
 })
 
 function handler(request, response) {
     let urlObj = url.parse(request.url, true, false)
-    console.log("\n============================")
-    console.log("PATHNAME: " + urlObj.pathname)
-    console.log("REQUEST: " + ROOT_DIR + urlObj.pathname)
-    console.log("METHOD: " + request.method)
+    //console.log("\n============================")
+    //console.log("PATHNAME: " + urlObj.pathname)
+    //console.log("REQUEST: " + ROOT_DIR + urlObj.pathname)
+    //console.log("METHOD: " + request.method)
 
     let receivedData = ""
     let dataObj = null
@@ -98,7 +132,6 @@ function handler(request, response) {
         //handle GET requests as static file requests
         var filePath = ROOT_DIR + urlObj.pathname
         if (urlObj.pathname === "/") filePath = ROOT_DIR + "/curling.html"
-
         fs.readFile(filePath, function(err, data) {
           if (err) {
             //report error to console
@@ -111,7 +144,6 @@ function handler(request, response) {
           response.writeHead(200, {"Content-Type": get_mime(filePath)})
           response.end(data)
         })// read file end
-
       }// GET end
     })// end of massege
   }//handler end

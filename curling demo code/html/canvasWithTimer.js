@@ -37,7 +37,6 @@ required file. No attempt is made to bundle the files.
 //leave this moving word for fun and for using it to
 //provide status info to client.
 
-
 let timer //timer for animating motion
 let canvas = document.getElementById('canvas1') //our drawing canvas
 let iceSurface = new Ice(canvas)
@@ -49,6 +48,34 @@ shootingQueue = new Queue() //queue of stones still to be shot
 let shootingArea = iceSurface.getShootingArea()
 let stoneRadius = iceSurface.nominalStoneRadius()
 
+let PLAYER={
+  home:false,
+  visitor:false,
+  spectator:false
+}
+//connect to server and retain the socket
+let socket = io('http://' + window.document.location.host)
+//let socket = io('http://localhost:3000')
+
+
+socket.on('button_update', (data) => {
+  let playerData = JSON.parse(data)
+  let spectatorButton = document.getElementById("JoinAsSpectatorButton")
+  let visitorButton = document.getElementById("JoinAsVisitorButton")
+  let homeButton = document.getElementById("JoinAsHomeButton")
+  homeButton.style.backgroundColor = HOME_PROMPT_COLOUR
+  visitorButton.style.backgroundColor= VISITOR_PROMPT_COLOUR
+  spectatorButton.style.backgroundColor= SPECTATOR_PROMPT_COLOUR
+  console.log('Client home: '+ playerData.home)
+  console.log('Client visitor: '+ playerData.visitor)
+  homeButton.disabled = playerData.home
+  visitorButton.disabled = playerData.visitor
+  if (PLAYER.home === true || PLAYER.visitor === true){
+    spectatorButton.disable = true
+  }else{
+    spectatorButton.disable = false
+  }
+})
 
 
 //create stones
@@ -130,16 +157,6 @@ function drawCanvas() {
   iceSurface.drawScore(context, score)
 }
 
-//connect to server and retain the socket
-let socket = io('http://' + window.document.location.host)
-//let socket = io('http://localhost:3000')
-
-socket.on('post_data', function(data) {
-  console.log("data: " + data)
-  console.log("typeof: " + typeof data)
-  let responseObj = data
-  drawCanvas()
-})
 
 function getCanvasMouseLocation(e) {
   //provide the mouse location relative to the upper left corner
@@ -283,9 +300,19 @@ function handleKeyUp(e) {
 
 function handleJoinAsHomeButton(){
   console.log(`handleJoinAsHomeButton()`)
-  let btn = document.getElementById("JoinAsHomeButton")
-  btn.disabled = true //disable button
-  btn.style.backgroundColor="lightgray"
+  let playerData = {
+    playerType:"home",
+    playerStatus:"true"
+  }
+  socket.emit('player_registration',JSON.stringify(playerData))
+  let spectatorButton = document.getElementById("JoinAsSpectatorButton")
+  let visitorButton = document.getElementById("JoinAsVisitorButton")
+  let homeButton = document.getElementById("JoinAsHomeButton")
+  homeButton.disabled = true //disable button
+  homeButton.style.backgroundColor="lightgray"
+  spectatorButton.disabled = true //disable button
+  spectatorButton.style.backgroundColor="lightgray"
+  PLAYER.home=true
   if(!isHomePlayerAssigned){
     isHomePlayerAssigned = true
     isHomeClient = true
@@ -294,21 +321,45 @@ function handleJoinAsHomeButton(){
 }
 function handleJoinAsVisitorButton(){
   console.log(`handleJoinAsVisitorButton()`)
-  let btn = document.getElementById("JoinAsVisitorButton")
-  btn.disabled = true //disable button
-  btn.style.backgroundColor="lightgray"
-
+  let playerData = {
+    playerType:"visitor",
+    playerStatus:"true"
+  }
+  socket.emit('player_registration',JSON.stringify(playerData))
+  let spectatorButton = document.getElementById("JoinAsSpectatorButton")
+  let visitorButton = document.getElementById("JoinAsVisitorButton")
+  let homeButton = document.getElementById("JoinAsHomeButton")
+  visitorButton.disabled = true //disable button
+  spectatorButton.disabled = true //disable button
+  visitorButton.style.backgroundColor="lightgray"
+  spectatorButton.style.backgroundColor="lightgray"
+  PLAYER.visitor=true
   if(!isVisitorPlayerAssigned) {
     isVisitorPlayerAssigned = true
     isVisitorClient = true
   }
 }
 function handleJoinAsSpectatorButton(){
-  console.log(`handleJoinAsSpectatorButton()`)
-  let btn = document.getElementById("JoinAsSpectatorButton")
-  btn.disabled = true //disable button
-  btn.style.backgroundColor="lightgray"
 
+  console.log(`handleJoinAsSpectatorButton()`)
+  let playerData = {
+    playerType:"spectator",
+    playerStatus:"true"
+  }
+  socket.emit('player_registration',JSON.stringify(playerData))
+  let spectatorButton = document.getElementById("JoinAsSpectatorButton")
+  let visitorButton = document.getElementById("JoinAsVisitorButton")
+  let homeButton = document.getElementById("JoinAsHomeButton")
+  homeButton.disabled = true //disable button
+  spectatorButton.disabled = true //disable button
+  visitorButton.disabled = true //disable button
+  homeButton.style.backgroundColor="lightgray"
+  spectatorButton.style.backgroundColor="lightgray"
+  visitorButton.style.backgroundColor="lightgray"
+  PLAYER.spectator = true
+  PLAYER.home = true
+  PLAYER.visitor = true
+  if (PLAYER.spectator === false) PLAYER.spectator === true
   if(!isSpectatorClient) isSpectatorClient = true
 
 }
@@ -325,18 +376,15 @@ $(document).ready(function() {
 
   timer = setInterval(handleTimer, 5) //animation timer
   //clearTimeout(timer); //to stop timer
-
-  let btn = document.getElementById("JoinAsHomeButton")
-  btn.disabled = false //enable button
-  btn.style.backgroundColor = HOME_PROMPT_COLOUR
-  btn = document.getElementById("JoinAsVisitorButton")
-  btn.disabled = false //enable button
-  btn.style.backgroundColor= VISITOR_PROMPT_COLOUR
-  btn = document.getElementById("JoinAsSpectatorButton")
-  btn.disabled = false //enable button
-  btn.style.backgroundColor= SPECTATOR_PROMPT_COLOUR
-
-
+  let spectatorButton = document.getElementById("JoinAsSpectatorButton")
+  let visitorButton = document.getElementById("JoinAsVisitorButton")
+  let homeButton = document.getElementById("JoinAsHomeButton")
+  homeButton.style.backgroundColor = HOME_PROMPT_COLOUR
+  visitorButton.style.backgroundColor= VISITOR_PROMPT_COLOUR
+  spectatorButton.style.backgroundColor= SPECTATOR_PROMPT_COLOUR
+  homeButton.disabled = false
+  spectatorButton.disabled = false
+  visitorButton.disabled = false
 
   drawCanvas()
 })
