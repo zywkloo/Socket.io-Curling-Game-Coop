@@ -28,6 +28,7 @@ let players = {
   home:false,
   visitor:false
 }
+let shootingQueue
 
 const MIME_TYPES = {
   css: "text/css",
@@ -57,6 +58,7 @@ function get_mime(filename) {
 
 io.on('connection', function(socket){
   io.emit('button_update', JSON.stringify(players))
+  io.emit('new_client')
 
 
   socket.on('player_registration',(data) => {
@@ -85,14 +87,13 @@ io.on('connection', function(socket){
     io.emit('button_update', JSON.stringify(sendingData))
   })
 
+  socket.on('colour_update',(data) => {
 
-
-  socket.on('new_client',()=>{
-    console.log('new client joined')
-    let sendingData = players
-    //console.log('PLAYERS ON SERVER : '+ JSON.stringify(sendingData))
-    io.emit('button_update', JSON.stringify(sendingData))
+    io.emit('update_colour',data)
   })
+
+
+
 })
 
 function handler(request, response) {

@@ -38,6 +38,7 @@ required file. No attempt is made to bundle the files.
 //provide status info to client.
 
 let timer //timer for animating motion
+let timer2
 let canvas = document.getElementById('canvas1') //our drawing canvas
 let iceSurface = new Ice(canvas)
 
@@ -87,6 +88,17 @@ socket.on('button_update_spectator', () => {
   homeButton.disable=true
   spectatorButton.disable=true
   PLAYER.spectator = true
+  enableShooting=false
+})
+socket.on('new_client',()=>{
+  console.log('shoot disabled')
+  enableShooting=false// cant shoot untill register as home or visitor
+})
+
+
+socket.on('update_colour',(data) => {
+  let serverColour = JSON.parse(data)
+  if (shootingQueue.front().getColour() !== serverColour) shootingQueue.dequeue()
 })
 
 
@@ -254,6 +266,7 @@ function handleMouseUp(e) {
     if (stoneBeingShot != null) stoneBeingShot.addVelocity(cueVelocity)
     shootingCue = null
     shootingQueue.dequeue()
+    handleColour()
     enableShooting = false //disable shooting until shot stone stops
   }
 
@@ -278,13 +291,19 @@ function handleTimer() {
   setOfCollisions.removeOldCollisions()
 
   if(allStones.isAllStonesStopped()){
-    if(!shootingQueue.isEmpty()) whosTurnIsIt = shootingQueue.front().getColour()
+    if(!shootingQueue.isEmpty()) {
+      let colour = shootingQueue.front().getColour()
+      whosTurnIsIt = colour
+    }
     score = iceSurface.getCurrentScore(allStones)
     enableShooting = true
   }
-
   drawCanvas()
 }
+function handleColour() {
+  socket.emit('colour_update',JSON.stringify(shootingQueue.front().getColour()))
+}
+
 
 //KEY CODES
 //should clean up these hard coded key codes
@@ -311,6 +330,7 @@ function handleKeyUp(e) {
 
 
 function handleJoinAsHomeButton(){
+  enableShooting = true
   console.log(`handleJoinAsHomeButton()`)
   let playerData = {
     playerType:"home",
@@ -332,6 +352,7 @@ function handleJoinAsHomeButton(){
 
 }
 function handleJoinAsVisitorButton(){
+  enableShooting = true
   console.log(`handleJoinAsVisitorButton()`)
   let playerData = {
     playerType:"visitor",
@@ -352,7 +373,7 @@ function handleJoinAsVisitorButton(){
   }
 }
 function handleJoinAsSpectatorButton(){
-
+  enableShooting = false
   console.log(`handleJoinAsSpectatorButton()`)
   let playerData = {
     playerType:"spectator",
@@ -383,7 +404,7 @@ $(document).ready(function() {
   $(document).keydown(handleKeyDown)
   $(document).keyup(handleKeyUp)
 
-  timer = setInterval(handleTimer, 5) //animation timer
+  timer = setInterval(handleTimer, 5)
   //clearTimeout(timer); //to stop timer
   let spectatorButton = document.getElementById("JoinAsSpectatorButton")
   let visitorButton = document.getElementById("JoinAsVisitorButton")
