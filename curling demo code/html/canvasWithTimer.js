@@ -89,10 +89,45 @@ socket.on('button_update_spectator', () => {
   enableShooting=false
 })
 socket.on('new_client',()=>{
-  console.log('shoot disabled')
+
   enableShooting=false// cant shoot untill register as home or visitor
 })
+socket.on('m_up',()=>{
+  if (shootingCue != null) {
+    let cueVelocity = shootingCue.getVelocity()
+    if (stoneBeingShot != null) stoneBeingShot.addVelocity(cueVelocity)
+    shootingCue = null
+    shootingQueue.dequeue()
+    enableShooting = false //disable shooting until shot stone stops
+  }
+})
+socket.on('update_ball_move',(data)=>{
+  let ballData = JSON.parse(data)
+  if (shootingCue != null) {
+    shootingCue.setCueEnd(ballData.x, ballData.y)
+  }
+})
+socket.on('update_ball_down',(data)=>{
+  let ballData = JSON.parse(data)
+  let canvasMouseLoc = {
+    x:ballData.x,
+    y:ballData.y
+  }
+  stoneBeingShot =allStones.stoneAtLocation(ballData.x, ballData.y)
+  if(stoneBeingShot === null){
+    if(iceSurface.isInShootingCrosshairArea(canvasMouseLoc)){
+      if(shootingQueue.isEmpty()) stageStones()
+      //console.log(`shooting from crosshair`)
+      stoneBeingShot = shootingQueue.front()
+      stoneBeingShot.setLocation(canvasMouseLoc)
+      //we clicked near the shooting crosshair
+    }
+  }
 
+  if (stoneBeingShot != null) {
+    shootingCue = new Cue(ballData.x, ballData.y)
+  }
+})
 
 socket.on('update_colour',(data) => {
   let serverColour = JSON.parse(data)
@@ -234,6 +269,12 @@ function handleMouseDown(e) {
   let canvasX = canvasMouseLoc.x
   let canvasY = canvasMouseLoc.y
   //console.log("mouse down:" + canvasX + ", " + canvasY)
+  let ballData={
+    x:canvasX,
+    y:canvasY,
+    down:true
+  }
+  socket.emit('ball_update_down',JSON.stringify(ballData))
 
   stoneBeingShot =allStones.stoneAtLocation(canvasX, canvasY)
 
@@ -271,6 +312,11 @@ function handleMouseMove(e) {
   //console.log("mouse move: " + canvasX + "," + canvasY)
 
   if (shootingCue != null) {
+    let ballData = {
+      x:canvasX,
+      y:canvasY
+    }
+    socket.emit('ball_update_move',JSON.stringify(ballData))
     shootingCue.setCueEnd(canvasX, canvasY)
   }
 
@@ -281,13 +327,14 @@ function handleMouseMove(e) {
 
 function handleMouseUp(e) {
   //console.log("mouse up")
+
   e.stopPropagation()
   if (shootingCue != null) {
+    socket.emit('mouse_up')
     let cueVelocity = shootingCue.getVelocity()
     if (stoneBeingShot != null) stoneBeingShot.addVelocity(cueVelocity)
     shootingCue = null
     shootingQueue.dequeue()
-    socket.emit('colour_update',JSON.stringify(shootingQueue.front().getColour()))
     enableShooting = false //disable shooting until shot stone stops
   }
 
@@ -315,16 +362,14 @@ function handleTimer() {
     if(!shootingQueue.isEmpty()) {
       let colour = shootingQueue.front().getColour()
       whosTurnIsIt = colour
+    }else{
+      if (score.home>score.visitor) whosTurnIsIt = 'red'
+      else if (score.home<score.visitor) whosTurnIsIt = 'yellow'
     }
     score = iceSurface.getCurrentScore(allStones)
     enableShooting = true
   }
   drawCanvas()
-}
-function handleColour() {
-  if (!shootingQueue.isEmpty()){
-    socket.emit('colour_update',JSON.stringify(shootingQueue.front().getColour()))
-  }
 }
 
 

@@ -57,14 +57,18 @@ function get_mime(filename) {
 }
 
 io.on('connection', function(socket){
+  socket.on('ball_update_down',(data) => {
+    io.emit('update_ball_down',data)
+  })
+  socket.on('mouse_up',(data) => {
+    io.emit('m_up',data)
+  })
+  socket.on('ball_update_move',(data) => {
+    io.emit('update_ball_move',data)
+  })
     // this is the curUser information alive only for this session
     var curUser= {home:false,visitor:false,spectator:false}
     io.emit('button_update', JSON.stringify(players))
-
-    socket.on('colour_update',(data) => {
-      console.log(JSON.stringify(data))
-      io.emit('update_colour',data)
-    })
     socket.on('player_registration',(data) => {
         let playerData = JSON.parse(data)
         //home player join
