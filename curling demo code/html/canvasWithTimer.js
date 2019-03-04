@@ -129,13 +129,6 @@ socket.on('update_ball_down',(data)=>{
   }
 })
 
-socket.on('update_colour',(data) => {
-  let serverColour = JSON.parse(data)
-  console.log('serverColour: '+ serverColour)
-  if (shootingQueue.front().getColour() !== serverColour && !shootingQueue.isEmpty()) {
-    shootingQueue.dequeue()
-  }
-})
 
 //get the leaver's name
 socket.on('leave',function(data){
