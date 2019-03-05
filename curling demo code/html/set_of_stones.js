@@ -17,6 +17,7 @@ class SetOfStones {
     //add element x if no current element === x
     if (this.collection.indexOf(aStone) < 0) this.collection.push(aStone)
   }
+
   addAll(aSetOfStones) {
     //add element x if no current element === x
     for(let stone of aSetOfStones.collection)

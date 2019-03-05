@@ -26,9 +26,10 @@ const ROOT_DIR = "html" //dir to serve static files from
 // global variable storing all players information. this is a unique obj in the whole game.
 var players = {
   home:false,
-  visitor:false
+  visitor:false,
+    spectator:0,
 }
-let shootingQueue
+var gameStatus ={}
 
 const MIME_TYPES = {
   css: "text/css",
@@ -66,10 +67,30 @@ io.on('connection', function(socket){
   socket.on('ball_update_move',(data) => {
     io.emit('update_ball_move',data)
   })
+    //if the session between the server and an already synced socket successfully catches the syncing message
+    socket.on("sync_message_from_synced_to_server",(data)=>{
+        console.log(":Sync_init:server get the synce_message: "+data)
+        //respectively update this sync_pending client's status
+        socket.to("sync_pending").emit("sync_message_from_server_to_unsynced",data)
+        //socket.join("is_status_shared_to_init")
+    })
     // this is the curUser information alive only for this session
     var curUser= {home:false,visitor:false,spectator:false}
     io.emit('button_update', JSON.stringify(players))
     socket.on('player_registration',(data) => {
+        //if no prev players , sync done
+        if (players.home===false && players.visitor===false && players.spectator<=0 ){
+            socket.join("sync_finished")
+            console.log(":Sync_init: now "+socket.id+" sync_finished")
+        } else {
+        //send get status requests to clients, which have been synced.
+        //send get status requests to clients, which have been synced.
+            socket.join("sync_pending")
+            console.log("now "+socket.id+" sync_pending")
+            io.to("sync_finished").emit('get_sync_message_request',"hello")
+            console.log(":Sync_init: now send get status request to clients, which are sync_finished ")
+        }
+
         let playerData = JSON.parse(data)
         //home player join
         if (playerData.playerType === "home" &&
@@ -89,18 +110,18 @@ io.on('connection', function(socket){
         // spectator join
         if(playerData.playerType === "spectator" &&
         playerData.playerStatus ==="true" ){
+            players.spectator+=1
             curUser.spectator= true
             console.log("curUser: "+JSON.stringify(curUser)+ 'is ready')
         }
         let sendingData = players
         //console.log('PLAYERS ON SERVER : '+ JSON.stringify(sendingData))
         io.emit('button_update', JSON.stringify(sendingData))
-
         //check the disconnect status with async
         checkDisconnect(curUser)
     })
     //handle disconnect event
-    var checkDisconnect = function (curUser) {
+    var checkDisconnect =  (curUser) => {
         socket.on('disconnect', () => {
             /*broadcast all leave events to client*/
             //console.log(JSON.stringify(curUser))
@@ -109,6 +130,9 @@ io.on('connection', function(socket){
             }
             if (curUser.home == true) {
                 players.home = false
+            }
+            if (curUser.spectator == true) {
+                players.spectator -= 1
             }
             console.log("curUser: " + JSON.stringify(curUser) + ' left')
             console.log("players status: " + JSON.stringify(players))

@@ -58,7 +58,6 @@ let PLAYER={
 let socket = io('http://' + window.document.location.host)
 //let socket = io('http://localhost:3000')
 
-
 socket.on('button_update', (data) => {
   let playerData = JSON.parse(data)
   let spectatorButton = document.getElementById("JoinAsSpectatorButton")
@@ -89,8 +88,7 @@ socket.on('button_update_spectator', () => {
   enableShooting=false
 })
 socket.on('new_client',()=>{
-
-  enableShooting=false// cant shoot untill register as home or visitor
+  enableShooting=false// can't shoot until registering as home or visitor
 })
 socket.on('m_up',()=>{
   if (shootingCue != null) {
@@ -189,6 +187,99 @@ function stageStones(){
 
 stageStones()
 
+//response to the get sync message request . only the synced clients could get this.
+socket.on("get_sync_message_request",()=>{
+  var game_status = {
+    "allStones":allStones ,
+    "homeStones":homeStones,
+    "visitorStones":visitorStones,
+    "shootingQueue":shootingQueue,
+    "whosTurnIsIt":whosTurnIsIt,
+    "score":score
+  }
+  let data = JSON.stringify(game_status)
+  socket.emit ("sync_message_from_synced_to_server",data)
+})
+/*
+function copyStatus(coll,all_items){
+  for(let i=0; i<coll.size; i++){
+    let item = all_items.collection[i]
+    coll[i].velocityX= item.velocityX
+    coll[i].velocityY= item.velocityY
+    coll[i].x=item.x
+    coll[i].y=item.y
+    coll[i].radius = item.radius
+    coll[i].colour = item.colour
+    coll[i].isMoving= item.isMoving
+  }
+  return coll
+}
+*/
+//handle the  sync_message_from_server_to_unsynced . only the UN-synced clients could get this.
+socket.on("sync_message_from_server_to_unsynced",(data)=>{
+  console.log("LAST STEP :Get the data, now updating game_status: "+ data)
+  let game_status = JSON.parse(data)
+  whosTurnIsIt=game_status.whosTurnIsIt
+  score=game_status.score
+  allStones.getCollection().map((stone,i=0) => {
+    let item = game_status.allStones.collection[i]
+    stone.velocityX= item.velocityX
+    stone.velocityY= item.velocityY
+    stone.x=item.x
+    stone.y=item.y
+    stone.isMoving=item.isMoving
+    ++ i
+    return stone;
+  })
+  shootingQueue.getCollection().map((shot,i=0) => {
+    let item = game_status.shootingQueue.collection[i]
+    //shot.velocityX= item.velocityX
+    //shot.velocityY= item.velocityY
+    shot.x=item.x
+    shot.y=item.y
+    ++ i
+    return shot;
+  })
+  /*
+  for(let i=0; i<allStones.size; i++){
+    let item = game_status.allStones.collection[i]
+    allStones.elementAt(i).velocityX= item.velocityX
+    allStones.elementAt(i).velocityY= item.velocityY
+    allStones.elementAt(i).x=item.x
+    allStones.elementAt(i).y=item.y
+    allStones.elementAt(i).radius = item.radius
+    allStones.elementAt(i).colour = item.colour
+    allStones.elementAt(i).isMoving= item.isMoving
+  }
+  */
+  for(let i=0; i<homeStones.size(); i++){
+    let item = game_status.homeStones.collection[i]
+    homeStones.elementAt(i).velocityX= item.velocityX
+    homeStones.elementAt(i).velocityY= item.velocityY
+    homeStones.elementAt(i).x=item.x
+    homeStones.elementAt(i).y=item.y
+    homeStones.elementAt(i).colour=item.colour
+    homeStones.elementAt(i).isMoving= item.isMoving
+  }
+  for(let i=0; i<visitorStones.size(); i++){
+    let item = game_status.visitorStones.collection[i]
+    visitorStones.elementAt(i).velocityX= item.velocityX
+    visitorStones.elementAt(i).velocityY= item.velocityY
+    visitorStones.elementAt(i).x=item.x
+    visitorStones.elementAt(i).y=item.y
+    visitorStones.elementAt(i).colour=item.colour
+    visitorStones.elementAt(i).isMoving= item.isMoving
+  }
+  //copyStatus(game_status.homeStones)
+  //copyStatus(game_status.visitorStones)
+  //copyStatus(shootingQueue,game_status.shootingQueue)
+  drawCanvas()
+  console.log("After Copy 1.allStones :   \n "+ JSON.stringify(allStones))
+  console.log("After Copy 2.homeStones:   \n "+ JSON.stringify(homeStones))
+  console.log("After Copy 3.visitorStones:\n "+ JSON.stringify(visitorStones))
+  console.log("After Copy 4.score:        \n "+ JSON.stringify(score))
+})
+
 //console.log(`stones: ${allStones.toString()}`)
 
 let setOfCollisions = new SetOfCollisions()
@@ -280,7 +371,6 @@ function handleMouseDown(e) {
       //we clicked near the shooting crosshair
     }
   }
-
   if (stoneBeingShot != null) {
     shootingCue = new Cue(canvasX, canvasY)
     $("#canvas1").mousemove(handleMouseMove)
@@ -296,7 +386,6 @@ function handleMouseDown(e) {
 }
 
 function handleMouseMove(e) {
-
 
   let canvasMouseLoc = getCanvasMouseLocation(e)
   let canvasX = canvasMouseLoc.x
@@ -340,6 +429,7 @@ function handleMouseUp(e) {
 
 
 function handleTimer() {
+
 
   allStones.advance(iceSurface.getShootingArea())
   for (let stone1 of allStones.getCollection()) {
