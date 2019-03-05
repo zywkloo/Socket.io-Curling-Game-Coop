@@ -36,6 +36,7 @@ required file. No attempt is made to bundle the files.
 
 //leave this moving word for fun and for using it to
 //provide status info to client.
+"use strict";
 
 let timer //timer for animating motion
 let timer2
@@ -74,6 +75,7 @@ socket.on('button_update', (data) => {
     spectatorButton.disable = false
   }
 })
+//update button status
 socket.on('button_update_spectator', () => {
   let spectatorButton = document.getElementById("JoinAsSpectatorButton")
   let visitorButton = document.getElementById("JoinAsVisitorButton")
@@ -200,21 +202,7 @@ socket.on("get_sync_message_request",()=>{
   let data = JSON.stringify(game_status)
   socket.emit ("sync_message_from_synced_to_server",data)
 })
-/*
-function copyStatus(coll,all_items){
-  for(let i=0; i<coll.size; i++){
-    let item = all_items.collection[i]
-    coll[i].velocityX= item.velocityX
-    coll[i].velocityY= item.velocityY
-    coll[i].x=item.x
-    coll[i].y=item.y
-    coll[i].radius = item.radius
-    coll[i].colour = item.colour
-    coll[i].isMoving= item.isMoving
-  }
-  return coll
-}
-*/
+
 //handle the  sync_message_from_server_to_unsynced . only the UN-synced clients could get this.
 socket.on("sync_message_from_server_to_unsynced",(data)=>{
   console.log("LAST STEP :Get the data, now updating game_status: "+ data)
@@ -231,27 +219,7 @@ socket.on("sync_message_from_server_to_unsynced",(data)=>{
     ++ i
     return stone;
   })
-  shootingQueue.getCollection().map((shot,i=0) => {
-    let item = game_status.shootingQueue.collection[i]
-    //shot.velocityX= item.velocityX
-    //shot.velocityY= item.velocityY
-    shot.x=item.x
-    shot.y=item.y
-    ++ i
-    return shot;
-  })
-  /*
-  for(let i=0; i<allStones.size; i++){
-    let item = game_status.allStones.collection[i]
-    allStones.elementAt(i).velocityX= item.velocityX
-    allStones.elementAt(i).velocityY= item.velocityY
-    allStones.elementAt(i).x=item.x
-    allStones.elementAt(i).y=item.y
-    allStones.elementAt(i).radius = item.radius
-    allStones.elementAt(i).colour = item.colour
-    allStones.elementAt(i).isMoving= item.isMoving
-  }
-  */
+//update the set of homestones
   for(let i=0; i<homeStones.size(); i++){
     let item = game_status.homeStones.collection[i]
     homeStones.elementAt(i).velocityX= item.velocityX
@@ -261,6 +229,7 @@ socket.on("sync_message_from_server_to_unsynced",(data)=>{
     homeStones.elementAt(i).colour=item.colour
     homeStones.elementAt(i).isMoving= item.isMoving
   }
+  //update the set of visitors
   for(let i=0; i<visitorStones.size(); i++){
     let item = game_status.visitorStones.collection[i]
     visitorStones.elementAt(i).velocityX= item.velocityX
@@ -270,6 +239,17 @@ socket.on("sync_message_from_server_to_unsynced",(data)=>{
     visitorStones.elementAt(i).colour=item.colour
     visitorStones.elementAt(i).isMoving= item.isMoving
   }
+  //update the the
+  let newShootingQueue = new Queue()
+  for (let i; i <game_status.shootingQueue.length;i++){
+    let item = game_status.shootingQueue.collection[i]
+    let shot = new Stone(item.x,item.y,item.radius,item.colour)
+    shot.velocityX= item.velocityX
+    shot.velocityY= item.velocityY
+    shot.isStoneMoving= item.isMoving
+    newShootingQueue.enqueue(shot)
+  }
+  shootingQueue=newShootingQueue
   //copyStatus(game_status.homeStones)
   //copyStatus(game_status.visitorStones)
   //copyStatus(shootingQueue,game_status.shootingQueue)
