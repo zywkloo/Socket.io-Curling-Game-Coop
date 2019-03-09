@@ -20,7 +20,7 @@ const app = require("http").createServer(handler) //need to http
 const io = require('socket.io')(app)
 const fs = require("fs") //needed if you want to read and write files
 const url = require("url") //to parse url strings
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 80 || 443 || 8080
 app.listen(PORT)//server listening on PORT
 const ROOT_DIR = "html" //dir to serve static files from
 // global variable storing all players information. this is a unique obj in the whole game.
