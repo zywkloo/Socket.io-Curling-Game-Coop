@@ -2,7 +2,8 @@
 a cooperative Curling Game built with Socket.io
 
 * Website link, please see [here](http://curlingonlinecoop.ca-central-1.elasticbeanstalk.com/). 
-* Host by AWS Elastic Beanstalk. Currently not very stable.
+* Host by AWS Elastic Beanstalk. 
+* Currently the hosting is not very stable due to source code errors,  which now I'm debugging on .
   
 * Collision and gameplay base code by prof L.D Nel
 * Yiwei : disconnectivity broadcast, client grouping and rejoining sync
