@@ -8,7 +8,7 @@
  *Contributors:*
  
 * Prof L.D Nel: base code including collision detection and core gameplay.
-* Yiwei : disconnectivity broadcast, client grouping and rejoining sync
+* Yiwei: Sync Test branch, including disconnect broadcast, client grouping and rejoining sync. Web service deployment.
 * Yang : synchronization of stone motions and game rules
 
   ![The link](https://github.com/zywkloo/Socket.io-Curling-Game-Coop/raw/master/ScreenShot.png)
