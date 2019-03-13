@@ -5,7 +5,7 @@ a cooperative Curling Game built with Socket.io
 * Host by AWS Elastic Beanstalk. 
 * Currently the hosting is not very stable due to source code errors,  which now I'm debugging on .
   
-* Collision and gameplay base code by prof L.D Nel
+* Prof L.D Nel: base code including collision detection and core gameplay.
 * Yiwei : disconnectivity broadcast, client grouping and rejoining sync
 * Yang : synchronization of stone motions and game rules
 
