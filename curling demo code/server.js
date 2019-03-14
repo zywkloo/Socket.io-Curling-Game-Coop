@@ -137,23 +137,25 @@ function handler(request, response) {
 
     //event handler for the end of the message
     request.on("end", function() {
-      //Handle the client POST requests
-      //console.log('received data: ', receivedData)
 
       //If it is a POST request then we will check the data.
       if (request.method == "POST") {
         //Do this for all POST messages
         //echo back the data to the client FOR NOW
-        dataObj = JSON.parse(receivedData)
-        console.log("received data object: ", dataObj)
-        console.log("type: ", typeof dataObj)
-        console.log("USER REQUEST: " + dataObj.text)
-        returnObj = {}
-        returnObj.text = dataObj.text
-        response.writeHead(200, {
-          "Content-Type": MIME_TYPES["json"]
-        })
-        response.end(JSON.stringify(returnObj))
+        try {
+          dataObj = JSON.parse(receivedData)
+          console.log("received data object: ", dataObj)
+          console.log("type: ", typeof dataObj)
+          console.log("USER REQUEST: " + dataObj.text)
+          returnObj = {}
+          returnObj.text = dataObj.text
+          response.writeHead(200, {
+            "Content-Type": MIME_TYPES["json"]
+          })
+          response.end(JSON.stringify(returnObj))
+        } catch (err){
+          console.log("POST REQUEST ERROR: " + JSON.stringify(err))
+        }
       }
       else if (request.method == "GET") {
         //handle GET requests as static file requests
