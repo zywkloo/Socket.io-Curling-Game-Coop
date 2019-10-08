@@ -1,8 +1,10 @@
 # Socket.io Curling Game Cooperative
 *A cooperative Curling Web Game built with Socket.io*
 
-* Website link, please see [here](http://curlingonlinecoop.ca-central-1.elasticbeanstalk.com/). 
-* Hosted by AWS Elastic Beanstalk. 
+~~* Website link, please see [here](http://curlingonlinecoop.ca-central-1.elasticbeanstalk.com/).
+* Hosted by AWS Elastic Beanstalk. ~~
+
+Due to financial reasons, this website is no longer maintained.
 
  *Contributors:*
  
